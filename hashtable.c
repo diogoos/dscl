@@ -5,8 +5,7 @@
 #include <string.h>
 
 #define HT_EXPANSION_FACTOR 2
-#define HT_PRIME 1
-
+#define HT_PRIME 37
 
 // Hashing functions used in the table
 #define FNV_PRIME_32 16777619
@@ -28,7 +27,7 @@ size_t h1(size_t const k, const size_t m) {
 }
 
 size_t h2(size_t const k, const size_t m) {
-    return 1 + (k % (m - 1));
+    return HT_PRIME + (k % (m - HT_PRIME));
 }
 
 size_t hash_key(const char* str, const size_t p, const size_t m) {
