@@ -1,4 +1,4 @@
-#include "hashtable.h"
+#include "hashmap.h"
 #include "hash.h"
 
 #include <stdio.h>
@@ -34,7 +34,7 @@ typedef struct {
     enum HashSlotMarker state;
 } hashtable_slot;
 
-struct hashtable_t {
+struct HashMap {
     hashtable_slot* slots;
     size_t size;
     size_t capacity;
@@ -53,16 +53,16 @@ void hashtable_slot_dump(hashtable_slot* slots, size_t capacity) {
     }
 }
 
-void hashtable_dump(hashtable_t* ht) {
+void hashtable_dump(HashMap* ht) {
     //printf("\nTable size: %lu\nTable capacity: %lu\nTable address: %p\n", ht->size, ht->capacity, ht);
     hashtable_slot_dump(ht->slots, ht->capacity);
     //printf("\n");
 }
 
 // Create a new hashtable and allocate the memory as needed
-hashtable_t* create_hashtable(const size_t capacity) {
+HashMap* hashmap_create(const size_t capacity) {
     // Allocate a new hash table on the stack
-    hashtable_t* ht = malloc(sizeof(hashtable_t));
+    HashMap* ht = malloc(sizeof(HashMap));
     ht->size = 0;
     ht->capacity = capacity;
 
@@ -75,7 +75,7 @@ hashtable_t* create_hashtable(const size_t capacity) {
     return ht;
 }
 
-void destroy_hashtable(hashtable_t* ht) {
+void hashmap_free(HashMap* ht) {
     for (size_t i = 0; i < ht->capacity; i++) {
         free((void*)ht->slots[i].key);
     }
@@ -130,7 +130,7 @@ static const char* hashtable_slot_insert(hashtable_slot* slots, const size_t cap
 
 // Internal method that expands the hashtable when needed
 // However, if we expand the table, we need to recompute the hashes
-size_t hashtable_expand(hashtable_t* ht) {
+size_t hashtable_expand(HashMap* ht) {
     size_t const new_capacity = ht->capacity * HT_EXPANSION_FACTOR;
     hashtable_slot* new_slots = calloc(new_capacity, sizeof(hashtable_slot));
 
@@ -162,7 +162,7 @@ size_t hashtable_expand(hashtable_t* ht) {
 }
 
 // Insert a key and value into a hashset
-const char* hashtable_insert(hashtable_t* ht, const char* key, void* value) {
+const char* hashmap_insert(HashMap* ht, const char* key, void* value) {
     //printf("\n---------------------\nhashtable_insert: key: %s, value: %p\n", key, value);
     if (ht->slots == NULL || value == NULL) return NULL;
 
@@ -180,7 +180,7 @@ const char* hashtable_insert(hashtable_t* ht, const char* key, void* value) {
 }
 
 
-int hashtable_delete(hashtable_t* ht, const char* key) {
+int hashmap_remove(HashMap* ht, const char* key) {
     // Calculate the hashed index of the table
     size_t index = hash_key(key, 0, ht->capacity);
 
@@ -209,7 +209,7 @@ int hashtable_delete(hashtable_t* ht, const char* key) {
     return 0;
 }
 
-void* hashtable_get(hashtable_t* ht, const char* key) {
+void* hashmap_get(HashMap* ht, const char* key) {
     if (key == NULL) return NULL;
 
     size_t index = hash_key(key, 0, ht->capacity);
@@ -230,8 +230,8 @@ void* hashtable_get(hashtable_t* ht, const char* key) {
     return NULL;
 }
 
-int hashtable_has_key(hashtable_t* ht, const char* key) {
-    return hashtable_get(ht, key) != NULL;
+int hashtable_has_key(HashMap* ht, const char* key) {
+    return hashmap_get(ht, key) != NULL;
 }
 
 
