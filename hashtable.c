@@ -1,26 +1,13 @@
 #include "hashtable.h"
+#include "hash.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+
 #define HT_EXPANSION_FACTOR 2
 #define HT_PRIME 37
-
-// Hashing functions used in the table
-#define FNV_PRIME_32 16777619
-#define FNV_OFFSET_32 2166136261U
-uint32_t FNV32(const char *s)
-{
-    uint32_t hash = FNV_OFFSET_32, i;
-    for(i = 0; i < strlen(s); i++)
-    {
-        hash = hash ^ (s[i]); // xor next byte into the bottom of the hash
-        hash = hash * FNV_PRIME_32; // Multiply by prime number found to work well
-    }
-    return hash;
-}
-
 
 size_t h1(size_t const k, const size_t m) {
     return k % m;
@@ -33,7 +20,7 @@ size_t h2(size_t const k, const size_t m) {
 size_t hash_key(const char* str, const size_t p, const size_t m) {
     if (str == NULL) return 0;
 
-    size_t const k = FNV32(str);
+    size_t const k = fnv32a_hash_str(str);
     return (h1(k, m) + (p * h2(k, m))) % m;
 }
 

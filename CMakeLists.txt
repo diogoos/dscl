@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.30)
-project(hashtable C)
+project(simplelib C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_library(hashtable STATIC hashtable.c)
+add_library(simplelib STATIC hashtable.c hash.c)
 
 # testing binary
 add_executable(ht_test ht_test.c)
-target_link_libraries(ht_test hashtable)
+target_link_libraries(ht_test simplelib)
 
 # enable testing
 enable_testing()

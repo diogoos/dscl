@@ -1,8 +1,8 @@
 #pragma once
 #include<stdlib.h>
 
-#ifndef HASHTABLE_LIBRARY_H
-#define HASHTABLE_LIBRARY_H
+#ifndef SIMPLELIB_HASHMAP_H
+#define SIMPLELIB_HASHMAP_H
 
 // Definition of the hash table
 typedef struct hashtable_t hashtable_t;
@@ -20,4 +20,4 @@ int hashtable_has_key(hashtable_t* ht, const char* key);
 
 void hashtable_dump(hashtable_t* ht);
 
-#endif //HASHTABLE_LIBRARY_H
+#endif //SIMPLELIB_HASHMAP_H
