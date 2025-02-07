@@ -16,6 +16,10 @@ This will take a long time and may not happen.
 - Built with performance and simplicity in mind.
 - Aimed at learning and building efficient, low-level implementations.
 
+> [!TIP]
+> The considerations behind the design and implementation of this library
+> are listed in the [**IMPLEMENTATION.md**](./IMPLEMENTATION.md) file.
+
 ## Progress
 - [x] FNV Hashing
 - [x] Hash Maps
