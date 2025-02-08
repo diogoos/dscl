@@ -8,10 +8,11 @@
 #include <time.h>
 #include "hashmap.h"
 
-#define NUM_TEST_KEYS 50000  // Adjust based on desired test size
+#define NUM_TEST_KEYS 50000
 
-int test_speed() {
+int test_insertion_speed() {
     printf("Testing insertion and lookup speed...\n");
+
     HashMap* ht = hashmap_create(NUM_TEST_KEYS / 5);
     if (!ht) {
         fprintf(stderr, "Failed to create hash table\n");
@@ -19,22 +20,18 @@ int test_speed() {
     }
 
     char key[32];
-    int values[NUM_TEST_KEYS];
 
-    clock_t start, end;
-    double time_taken;
-
-    // Insert test
-    start = clock();
+    // Insert speed test
+    clock_t start = clock();
     for (size_t i = 0; i < NUM_TEST_KEYS; i++) {
         snprintf(key, sizeof(key), "key%zu", i);
         hashmap_insert(ht, key, NULL);
     }
-    end = clock();
-    time_taken = (double)(end - start) / CLOCKS_PER_SEC;
+    clock_t end = clock();
+    double time_taken = (double) (end - start) / CLOCKS_PER_SEC;
     printf("\tInsertions: %d ops/sec\n", (int)(NUM_TEST_KEYS / time_taken));
 
-    // Lookup test
+    // Lookup speed test
     start = clock();
     for (size_t i = 0; i < NUM_TEST_KEYS; i++) {
         snprintf(key, sizeof(key), "key%zu", i);
@@ -43,27 +40,27 @@ int test_speed() {
     time_taken = (double)(end - start) / CLOCKS_PER_SEC;
     printf("\tLookups: %d ops/sec\n", (int)(NUM_TEST_KEYS / time_taken));
 
+    // Free the table
     hashmap_free(ht);
-
     printf("Insertion and lookup speed test completed.\n");
     return 0;
 }
 
 
-int test_simple() {
-    printf("Testing simple insert and retrieve...\n");
+int test_hardcoded_lookup() {
+    printf("Testing hardcoded insert and retrieve...\n");
 
-    char* key1 = "key1";
-    char* key2 = "key2";
-    char* key3 = "key3";
-    char* key4 = "key4";
-    char* key5 = "key5";
+    const char* key1 = "key1";
+    const char* key2 = "key2";
+    const char* key3 = "key3";
+    const char* key4 = "key4";
+    const char* key5 = "key5";
 
-    char* value1 = "value1";
-    char* value2 = "value2";
-    char* value3 = "value3";
-    char* value4 = "value4";
-    char* value5 = "value5";
+    const char* value1 = "value1";
+    const char* value2 = "value2";
+    const char* value3 = "value3";
+    const char* value4 = "value4";
+    const char* value5 = "value5";
 
     HashMap* ht = hashmap_create(5);
     hashmap_insert(ht, key1, value1);
@@ -71,9 +68,6 @@ int test_simple() {
     hashmap_insert(ht, key3, value3);
     hashmap_insert(ht, key4, value4);
     hashmap_insert(ht, key5, value5);
-
-    hashtable_dump(ht);
-
 
     char* result1 = hashmap_get(ht, key1);
     char* result2 = hashmap_get(ht, key2);
@@ -87,11 +81,28 @@ int test_simple() {
     assert(strcmp(value4, result4) == 0);
     assert(strcmp(value5, result5) == 0);
 
+    // Now, retest after a few removes
+    hashmap_remove(ht, key3);
+    hashmap_remove(ht, key4);
+
+    result1 = hashmap_get(ht, key1);
+    result2 = hashmap_get(ht, key2);
+    result3 = hashmap_get(ht, key3);
+    result4 = hashmap_get(ht, key4);
+    result5 = hashmap_get(ht, key5);
+
+    assert(strcmp(value1, result1) == 0);
+    assert(strcmp(value2, result2) == 0);
+    assert(result3 == NULL);
+    assert(result4 == NULL);
+    assert(strcmp(value5, result5) == 0);
+
     hashmap_free(ht);
 
     printf("Simple insert and retrieve test passed.\n");
     return 0;
 }
+
 
 void test_insert_get() {
     printf("Testing insert, get, and delete operations...\n");
@@ -115,6 +126,20 @@ void test_insert_get() {
         assert(value != NULL && *(int*)value == i);
     }
 
+    // Remove half of the values
+    for (int i = 0; i < NUM_TEST_KEYS / 2; i++) {
+        assert(hashmap_remove(ht, keys[i]) == 0);
+    }
+
+    // Try to remove a non-existent key
+    assert(hashmap_remove(ht, keys[0]) == 1);
+
+    // Ensure the values remain correct
+    for (int i = NUM_TEST_KEYS / 2; i < NUM_TEST_KEYS; i++) {
+        void* value = hashmap_get(ht, keys[i]);
+        assert(value != NULL && *(int*)value == i);
+    }
+
     // Cleanup
     free(keys);
     free(values);
@@ -124,7 +149,7 @@ void test_insert_get() {
 
 
 int main() {
-    test_simple();
+    test_hardcoded_lookup();
     test_insert_get();
-    test_speed();
+    test_insertion_speed();
 }
