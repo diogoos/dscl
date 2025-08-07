@@ -1,6 +1,7 @@
 #include "hashmap.h"
 #include "hash.h"
 
+#include <stdio.h>
 #include <string.h>
 
 #define HT_EXPANSION_FACTOR 2
@@ -159,15 +160,15 @@ int hashmap_remove(HashMap* hm, const char* key) {
     // Loop through the slots until we find an empty index, which
     // would mean that there is no such item in the list
     size_t checks = 0;
-    while (hm->slots[index].key != NULL && hm->slots[index].state != EMPTY) {
+    while (hm->slots[index].state != EMPTY && checks < hm->capacity) {
         // If a matching key is found at the index, we should now delete it
-        if (strcmp(hm->slots[index].key, key) == 0) {
+        if (hm->slots[index].key != NULL && strcmp(hm->slots[index].key, key) == 0) {
             hm->slots[index].state = DELETED;
             hm->slots[index].value = NULL;
             hm->slots[index].key = NULL;
 
             hm->size--;
-            return 1;
+            return 0;
         }
 
         // Otherwise, the key wasn't in this slot; we need to check
@@ -177,7 +178,7 @@ int hashmap_remove(HashMap* hm, const char* key) {
     }
 
     // There is no such item in the hash table, so it cannot be deleted
-    return 0;
+    return 1;
 }
 
 void* hashmap_get(const HashMap* hm, const char* key) {
@@ -185,9 +186,9 @@ void* hashmap_get(const HashMap* hm, const char* key) {
 
     size_t index = hash_key(key,0, hm->capacity);
     size_t checks = 0;
-    while (hm->slots[index].key != NULL && hm->slots[index].state != EMPTY) {
+    while (hm->slots[index].state != EMPTY && checks < hm->capacity) {
         // If we have a matching key, return it
-        if (strcmp(hm->slots[index].key, key) == 0) {
+        if (hm->slots[index].key != NULL && strcmp(hm->slots[index].key, key) == 0) {
             return hm->slots[index].value;
         }
 
@@ -198,5 +199,38 @@ void* hashmap_get(const HashMap* hm, const char* key) {
 
     // There is no such item in the hashtable
     return NULL;
+}
+
+void hashmap_debug(const HashMap* hm) {
+    printf("\n>>>> hashmap debug <<<<\n");
+    printf("* capacity: %zu\n", hm->capacity);
+    printf("* size: %zu\n", hm->size);
+    printf(">>>>>>>>>>>>>>>>>>>>\n");
+    for (int i = 0; i < hm->capacity; i++) {
+        printf("[h%3d] ", i);
+        HashSlot slot = hm->slots[i];
+        switch(slot.state) {
+            case DELETED:
+                printf("DEL    "); break;
+            case EMPTY:
+                printf("       "); break;
+            case INSERTED:
+                printf("INS    "); break;
+        }
+        if (slot.value != NULL) {
+            printf("v@%p\t", slot.value);
+        } else {
+            printf(".               \t");
+        }
+        
+        if (slot.key != NULL) {
+            printf("k:'%s'", slot.key);
+        } else {
+            printf(".");
+        }
+
+        printf("\n");
+    }
+    printf("<<<<<<<<<<<<<<<<<<<<\n\n");
 }
 

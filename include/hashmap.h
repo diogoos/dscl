@@ -54,4 +54,11 @@ void* hashmap_get(const HashMap* hm, const char *key);
  */
 int hashmap_remove(HashMap* hm, const char *key);
 
+/**
+ * Prints a debug representation of the hash map and its slots
+ * to stdout. For debug use only.
+ */
+void hashmap_debug(const HashMap* hm);
+
 #endif //SIMPLELIB_HASHMAP_H
+

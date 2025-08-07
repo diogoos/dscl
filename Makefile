@@ -12,7 +12,7 @@ $(shell mkdir -p build)
 
 .PHONY: all clean test
 
-all: $(LIB)
+all: $(LIB) $(TEST_BINS)
 
 $(LIB): $(OBJS)
 	ar rcs $@ $^
@@ -21,7 +21,7 @@ build/%.o: src/%.c include/%.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(TEST_BINS): build/%: tests/%.c $(LIB)
-	$(CC) $(CFLAGS) $< -Lbuild -l:simplelib.a -o $@
+	$(CC) $(CFLAGS) $< $(LIB) -o $@
 
 test: $(TEST_BINS)
 	@echo "Running all tests..."

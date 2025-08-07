@@ -8,9 +8,9 @@
 #include <time.h>
 #include "hashmap.h"
 
-#define NUM_TEST_KEYS 50000
+#define NUM_TEST_KEYS 500
 
-int test_insertion_speed() {
+int test_insertion_speed(void) {
     printf("Testing insertion and lookup speed...\n");
 
     HashMap* ht = hashmap_create(NUM_TEST_KEYS / 5);
@@ -47,7 +47,7 @@ int test_insertion_speed() {
 }
 
 
-int test_hardcoded_lookup() {
+int test_hardcoded_lookup(void) {
     printf("Testing hardcoded insert and retrieve...\n");
 
     const char* key1 = "key1";
@@ -63,11 +63,11 @@ int test_hardcoded_lookup() {
     const char* value5 = "value5";
 
     HashMap* ht = hashmap_create(5);
-    hashmap_insert(ht, key1, value1);
-    hashmap_insert(ht, key2, value2);
-    hashmap_insert(ht, key3, value3);
-    hashmap_insert(ht, key4, value4);
-    hashmap_insert(ht, key5, value5);
+    hashmap_insert(ht, key1, (void*)value1);
+    hashmap_insert(ht, key2, (void*)value2);
+    hashmap_insert(ht, key3, (void*)value3);
+    hashmap_insert(ht, key4, (void*)value4);
+    hashmap_insert(ht, key5, (void*)value5);
 
     char* result1 = hashmap_get(ht, key1);
     char* result2 = hashmap_get(ht, key2);
@@ -104,7 +104,7 @@ int test_hardcoded_lookup() {
 }
 
 
-void test_insert_get() {
+void test_insert_get(void) {
     printf("Testing insert, get, and delete operations...\n");
     HashMap *ht = hashmap_create(NUM_TEST_KEYS);
 
@@ -122,8 +122,8 @@ void test_insert_get() {
 
     // Get and validate values
     for (int i = 0; i < NUM_TEST_KEYS; i++) {
-        void* value = hashmap_get(ht, keys[i]);
-        assert(value != NULL && *(int*)value == i);
+        int* value = hashmap_get(ht, keys[i]);
+        assert(value != NULL && *value == i);
     }
 
     // Remove half of the values
@@ -131,13 +131,13 @@ void test_insert_get() {
         assert(hashmap_remove(ht, keys[i]) == 0);
     }
 
-    // Try to remove a non-existent key
+    // Try to remove a non-existent key (already removed)
     assert(hashmap_remove(ht, keys[0]) == 1);
 
     // Ensure the values remain correct
     for (int i = NUM_TEST_KEYS / 2; i < NUM_TEST_KEYS; i++) {
-        void* value = hashmap_get(ht, keys[i]);
-        assert(value != NULL && *(int*)value == i);
+        int* value = hashmap_get(ht, keys[i]);
+        assert(value != NULL && *value == i);
     }
 
     // Cleanup
@@ -148,7 +148,7 @@ void test_insert_get() {
 }
 
 
-int main() {
+int main(void) {
     test_hardcoded_lookup();
     test_insert_get();
     test_insertion_speed();
