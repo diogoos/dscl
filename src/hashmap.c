@@ -4,7 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#define HT_EXPANSION_FACTOR 2
+#define HT_EXPANSION_FACTOR 0.6
+#define HT_EXPANSION_MULTIPLIER 2
 #define HT_PRIME 37
 
 /**
@@ -78,7 +79,7 @@ static const char* dscl_hashtable_slot_insert(dscl_hashslot_t* slots, const size
     // matching key). It is guaranteed that one of these will occur,
     // since we have expanded the table as needed.
     size_t checks = 0;
-    while (slots[index].key != NULL && slots[index].state != EMPTY) {
+    while (slots[index].state != EMPTY) {
         // If a matching key is found at the index, we just need
         // to update its value and we're done!
         if (strcmp(slots[index].key, key) == 0) {
@@ -114,7 +115,7 @@ static const char* dscl_hashtable_slot_insert(dscl_hashslot_t* slots, const size
  * @return The new capacity of the hash table.
  */
 size_t dscl_hashtable_expand(dscl_hashmap_t* hm) {
-    size_t const new_capacity = hm->capacity * HT_EXPANSION_FACTOR;
+    size_t const new_capacity = hm->capacity * HT_EXPANSION_MULTIPLIER;
     dscl_hashslot_t* new_slots = calloc(new_capacity, sizeof(dscl_hashslot_t));
 
     // Rehash all existing keys into the new table
@@ -141,7 +142,7 @@ const char* dscl_hashmap_insert(dscl_hashmap_t* hm, const char* key, void* value
 
     // Check if we first need to expand the table, doing so if needed
     size_t capacity = hm->capacity;
-    if (hm->size >= (capacity / HT_EXPANSION_FACTOR)) {
+    if ((double)hm->size/hm->capacity >= HT_EXPANSION_FACTOR) {
         capacity = dscl_hashtable_expand(hm);
     }
 
@@ -162,9 +163,10 @@ int dscl_hashmap_remove(dscl_hashmap_t* hm, const char* key) {
     size_t checks = 0;
     while (hm->slots[index].state != EMPTY && checks < hm->capacity) {
         // If a matching key is found at the index, we should now delete it
-        if (hm->slots[index].key != NULL && strcmp(hm->slots[index].key, key) == 0) {
+        if (hm->slots[index].state == INSERTED && strcmp(hm->slots[index].key, key) == 0) {
             hm->slots[index].state = DELETED;
             hm->slots[index].value = NULL;
+            free((void*)hm->slots[index].key);
             hm->slots[index].key = NULL;
 
             hm->size--;
@@ -188,7 +190,7 @@ void* dscl_hashmap_get(const dscl_hashmap_t* hm, const char* key) {
     size_t checks = 0;
     while (hm->slots[index].state != EMPTY && checks < hm->capacity) {
         // If we have a matching key, return it
-        if (hm->slots[index].key != NULL && strcmp(hm->slots[index].key, key) == 0) {
+        if (hm->slots[index].state == INSERTED && strcmp(hm->slots[index].key, key) == 0) {
             return hm->slots[index].value;
         }
 
