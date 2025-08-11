@@ -1,10 +1,9 @@
-#pragma once
-#include<stdlib.h>
+#ifndef DSCL_HASHMAP_H
+#define DSCL_HASHMAP_H
 
-#ifndef SIMPLELIB_HASHMAP_H
-#define SIMPLELIB_HASHMAP_H
+#include <stdlib.h>
 
-typedef struct HashMap HashMap;
+typedef struct dscl_hashmap dscl_hashmap_t;
 
 /**
  * Creates a new hash map with the specified capacity.
@@ -13,7 +12,7 @@ typedef struct HashMap HashMap;
  * @param capacity The initial capacity of the hash map.
  * @return A pointer to the created hash map, or NULL if memory allocation fails.
  */
-HashMap* hashmap_create(size_t capacity);
+dscl_hashmap_t* dscl_hashmap_create(size_t capacity);
 
 /**
  * Frees the memory associated with the hash map.
@@ -21,7 +20,7 @@ HashMap* hashmap_create(size_t capacity);
  *
  * @param hm The hash map to be freed.
  */
-void hashmap_free(HashMap* hm);
+void dscl_hashmap_free(dscl_hashmap_t* hm);
 
 /**
  * Inserts a key-value pair into the hash map.
@@ -32,7 +31,7 @@ void hashmap_free(HashMap* hm);
  * @param value The value associated with the key.
  * @return The key that was inserted, or NULL if insertion failed.
  */
-const char* hashmap_insert(HashMap* hm, const char *key, void *value);
+const char* dscl_hashmap_insert(dscl_hashmap_t* hm, const char *key, void *value);
 
 /**
  * Retrieves the value associated with a given key in the hash map.
@@ -42,7 +41,7 @@ const char* hashmap_insert(HashMap* hm, const char *key, void *value);
  * @param key The key whose value is to be retrieved.
  * @return The value associated with the key, or NULL if the key is not found.
  */
-void* hashmap_get(const HashMap* hm, const char *key);
+void* dscl_hashmap_get(const dscl_hashmap_t* hm, const char *key);
 
 /**
  * Removes a key-value pair from the hash map.
@@ -52,13 +51,13 @@ void* hashmap_get(const HashMap* hm, const char *key);
  * @param key The key to be removed.
  * @return 1 if the key was removed successfully, 0 if the key was not found.
  */
-int hashmap_remove(HashMap* hm, const char *key);
+int dscl_hashmap_remove(dscl_hashmap_t* hm, const char *key);
 
 /**
  * Prints a debug representation of the hash map and its slots
  * to stdout. For debug use only.
  */
-void hashmap_debug(const HashMap* hm);
+void dscl_hashmap_debug(const dscl_hashmap_t* hm);
 
-#endif //SIMPLELIB_HASHMAP_H
+#endif //DSCL_HASHMAP_H
 

@@ -1,4 +1,4 @@
-LIB = build/simplelib.a 
+LIB = build/libdscl.a 
 
 CFLAGS = -Wall -pedantic -Iinclude
 CC = gcc
@@ -17,7 +17,7 @@ all: $(LIB) $(TEST_BINS)
 $(LIB): $(OBJS)
 	ar rcs $@ $^
 
-build/%.o: src/%.c include/%.h
+build/%.o: src/%.c include/dscl/%.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(TEST_BINS): build/%: tests/%.c $(LIB)

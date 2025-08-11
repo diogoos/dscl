@@ -6,14 +6,14 @@
 #include <assert.h>
 #include <string.h>
 #include <time.h>
-#include "hashmap.h"
+#include "dscl/hashmap.h"
 
-#define NUM_TEST_KEYS 500
+#define NUM_TEST_KEYS 5000
 
 int test_insertion_speed(void) {
     printf("Testing insertion and lookup speed...\n");
 
-    HashMap* ht = hashmap_create(NUM_TEST_KEYS / 5);
+    dscl_hashmap_t* ht = dscl_hashmap_create(NUM_TEST_KEYS / 5);
     if (!ht) {
         fprintf(stderr, "Failed to create hash table\n");
         return 1;
@@ -25,7 +25,7 @@ int test_insertion_speed(void) {
     clock_t start = clock();
     for (size_t i = 0; i < NUM_TEST_KEYS; i++) {
         snprintf(key, sizeof(key), "key%zu", i);
-        hashmap_insert(ht, key, NULL);
+        dscl_hashmap_insert(ht, key, NULL);
     }
     clock_t end = clock();
     double time_taken = (double) (end - start) / CLOCKS_PER_SEC;
@@ -41,7 +41,7 @@ int test_insertion_speed(void) {
     printf("\tLookups: %d ops/sec\n", (int)(NUM_TEST_KEYS / time_taken));
 
     // Free the table
-    hashmap_free(ht);
+    dscl_hashmap_free(ht);
     printf("Insertion and lookup speed test completed.\n");
     return 0;
 }
@@ -62,18 +62,18 @@ int test_hardcoded_lookup(void) {
     const char* value4 = "value4";
     const char* value5 = "value5";
 
-    HashMap* ht = hashmap_create(5);
-    hashmap_insert(ht, key1, (void*)value1);
-    hashmap_insert(ht, key2, (void*)value2);
-    hashmap_insert(ht, key3, (void*)value3);
-    hashmap_insert(ht, key4, (void*)value4);
-    hashmap_insert(ht, key5, (void*)value5);
+    dscl_hashmap_t* ht = dscl_hashmap_create(5);
+    dscl_hashmap_insert(ht, key1, (void*)value1);
+    dscl_hashmap_insert(ht, key2, (void*)value2);
+    dscl_hashmap_insert(ht, key3, (void*)value3);
+    dscl_hashmap_insert(ht, key4, (void*)value4);
+    dscl_hashmap_insert(ht, key5, (void*)value5);
 
-    char* result1 = hashmap_get(ht, key1);
-    char* result2 = hashmap_get(ht, key2);
-    char* result3 = hashmap_get(ht, key3);
-    char* result4 = hashmap_get(ht, key4);
-    char* result5 = hashmap_get(ht, key5);
+    char* result1 = dscl_hashmap_get(ht, key1);
+    char* result2 = dscl_hashmap_get(ht, key2);
+    char* result3 = dscl_hashmap_get(ht, key3);
+    char* result4 = dscl_hashmap_get(ht, key4);
+    char* result5 = dscl_hashmap_get(ht, key5);
 
     assert(strcmp(value1, result1) == 0);
     assert(strcmp(value2, result2) == 0);
@@ -82,14 +82,14 @@ int test_hardcoded_lookup(void) {
     assert(strcmp(value5, result5) == 0);
 
     // Now, retest after a few removes
-    hashmap_remove(ht, key3);
-    hashmap_remove(ht, key4);
+    dscl_hashmap_remove(ht, key3);
+    dscl_hashmap_remove(ht, key4);
 
-    result1 = hashmap_get(ht, key1);
-    result2 = hashmap_get(ht, key2);
-    result3 = hashmap_get(ht, key3);
-    result4 = hashmap_get(ht, key4);
-    result5 = hashmap_get(ht, key5);
+    result1 = dscl_hashmap_get(ht, key1);
+    result2 = dscl_hashmap_get(ht, key2);
+    result3 = dscl_hashmap_get(ht, key3);
+    result4 = dscl_hashmap_get(ht, key4);
+    result5 = dscl_hashmap_get(ht, key5);
 
     assert(strcmp(value1, result1) == 0);
     assert(strcmp(value2, result2) == 0);
@@ -97,7 +97,7 @@ int test_hardcoded_lookup(void) {
     assert(result4 == NULL);
     assert(strcmp(value5, result5) == 0);
 
-    hashmap_free(ht);
+    dscl_hashmap_free(ht);
 
     printf("Simple insert and retrieve test passed.\n");
     return 0;
@@ -106,7 +106,7 @@ int test_hardcoded_lookup(void) {
 
 void test_insert_get(void) {
     printf("Testing insert, get, and delete operations...\n");
-    HashMap *ht = hashmap_create(NUM_TEST_KEYS);
+    dscl_hashmap_t *ht = dscl_hashmap_create(NUM_TEST_KEYS);
 
     // Allocate memory for keys and values
     char (*keys)[20] = malloc(NUM_TEST_KEYS * sizeof(*keys));
@@ -117,33 +117,33 @@ void test_insert_get(void) {
     for (int i = 0; i < NUM_TEST_KEYS; i++) {
         snprintf(keys[i], 20, "%d", i);  // Store key as a string
         values[i] = i;
-        hashmap_insert(ht, keys[i], &values[i]);
+        dscl_hashmap_insert(ht, keys[i], &values[i]);
     }
 
     // Get and validate values
     for (int i = 0; i < NUM_TEST_KEYS; i++) {
-        int* value = hashmap_get(ht, keys[i]);
+        int* value = dscl_hashmap_get(ht, keys[i]);
         assert(value != NULL && *value == i);
     }
 
     // Remove half of the values
     for (int i = 0; i < NUM_TEST_KEYS / 2; i++) {
-        assert(hashmap_remove(ht, keys[i]) == 0);
+        assert(dscl_hashmap_remove(ht, keys[i]) == 0);
     }
 
     // Try to remove a non-existent key (already removed)
-    assert(hashmap_remove(ht, keys[0]) == 1);
+    assert(dscl_hashmap_remove(ht, keys[0]) == 1);
 
     // Ensure the values remain correct
     for (int i = NUM_TEST_KEYS / 2; i < NUM_TEST_KEYS; i++) {
-        int* value = hashmap_get(ht, keys[i]);
+        int* value = dscl_hashmap_get(ht, keys[i]);
         assert(value != NULL && *value == i);
     }
 
     // Cleanup
     free(keys);
     free(values);
-    hashmap_free(ht);
+    dscl_hashmap_free(ht);
     printf("Insert, get, and delete operations test passed.\n");
 }
 
