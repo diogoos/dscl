@@ -12,7 +12,13 @@ typedef struct dscl_hashmap dscl_hashmap_t;
  * @param capacity The initial capacity of the hash map.
  * @return A pointer to the created hash map, or NULL if memory allocation fails.
  */
-dscl_hashmap_t* dscl_hashmap_create(size_t capacity);
+dscl_hashmap_t* dscl_hashmap_create(
+    const size_t capacity,
+    size_t (*hash)(const void* key),
+    int (*equals)(const void* a, const void* b),
+    void* (*copy_key)(const void* key),
+    void (*destroy_key)(void* key)
+);
 
 /**
  * Frees the memory associated with the hash map.
@@ -31,7 +37,7 @@ void dscl_hashmap_free(dscl_hashmap_t* hm);
  * @param value The value associated with the key.
  * @return The key that was inserted, or NULL if insertion failed.
  */
-const char* dscl_hashmap_insert(dscl_hashmap_t* hm, const char *key, void *value);
+void* dscl_hashmap_insert(dscl_hashmap_t* hm, void* key, void *value);
 
 /**
  * Retrieves the value associated with a given key in the hash map.
@@ -41,7 +47,7 @@ const char* dscl_hashmap_insert(dscl_hashmap_t* hm, const char *key, void *value
  * @param key The key whose value is to be retrieved.
  * @return The value associated with the key, or NULL if the key is not found.
  */
-void* dscl_hashmap_get(const dscl_hashmap_t* hm, const char *key);
+void* dscl_hashmap_get(const dscl_hashmap_t* hm, void* key);
 
 /**
  * Removes a key-value pair from the hash map.
@@ -51,7 +57,7 @@ void* dscl_hashmap_get(const dscl_hashmap_t* hm, const char *key);
  * @param key The key to be removed.
  * @return 1 if the key was removed successfully, 0 if the key was not found.
  */
-int dscl_hashmap_remove(dscl_hashmap_t* hm, const char *key);
+int dscl_hashmap_remove(dscl_hashmap_t* hm, void* key);
 
 /**
  * Prints a debug representation of the hash map and its slots
