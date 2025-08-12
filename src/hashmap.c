@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define HT_EXPANSION_FACTOR 0.6
+#define HT_EXPANSION_FACTOR 0.8
 #define HT_EXPANSION_MULTIPLIER 2
 #define HT_PRIME 37
 

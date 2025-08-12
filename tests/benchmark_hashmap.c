@@ -2,7 +2,7 @@
 #include <time.h>
 #include "dscl/hashmap.h"
 
-#define NUM_TEST_KEYS 5000
+#define NUM_TEST_KEYS 50000
 
 size_t int_hash(const void* key) {
     return (size_t)(*(const int*)key);
