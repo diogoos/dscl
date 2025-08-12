@@ -1,6 +1,8 @@
+#ifndef DSCL_TREE_H
+#define DSCL_TREE_H
 
-#define T_RED 0
-#define T_BLACK 1
+#define T_RED 1
+#define T_BLACK 0
 
 typedef struct dscl_treenode {
     int color;
@@ -20,3 +22,4 @@ dscl_tree_t* tree_create(int key, void* value);
 void tree_insert(dscl_tree_t* tree, int key, void* value);
 void tree_debug(dscl_tree_t* tree);
 
+#endif //DSCL_TREE_H

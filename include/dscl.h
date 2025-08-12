@@ -7,5 +7,6 @@
 
 #include "dscl/hash.h"
 #include "dscl/hashmap.h"
+#include "dscl/tree.h"
 
 #endif //DSCL_H
