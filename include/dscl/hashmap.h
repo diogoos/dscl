@@ -60,6 +60,16 @@ void* dscl_hashmap_get(const dscl_hashmap_t* hm, void* key);
 int dscl_hashmap_remove(dscl_hashmap_t* hm, void* key);
 
 /**
+ * Returns the number of items in a hashmap
+ */
+int dscl_hashmap_size(dscl_hashmap_t* hm);
+
+/**
+ * Verifies whether a key exists in the hashmap
+ */
+int dscl_hashmap_has_key(dscl_hashmap_t* hm, void* key);
+
+/**
  * Prints a debug representation of the hash map and its slots
  * to stdout. For debug use only.
  */

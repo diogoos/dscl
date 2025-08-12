@@ -88,10 +88,12 @@ void dscl_hashmap_free(dscl_hashmap_t* hm) {
     free(hm);
 }
 
-static void* dscl_hashtable_slot_insert(dscl_hashslot_t* slots, const size_t capacity,
-                                        void* key, void* value, const int cpy, 
-                                        dscl_hashmap_t* proto) {
-    if (slots == NULL) return NULL;
+typedef enum hmi_result { HMI_INSERT, HMI_REPLACE, HMI_FAIL, HMI_NEEDS_EXPAND } hmi_result_t;
+
+static hmi_result_t dscl_hashtable_slot_insert(dscl_hashslot_t* slots, const size_t capacity,
+                                               void* key, void* value, const int cpy, 
+                                               dscl_hashmap_t* proto) {
+    if (slots == NULL) return HMI_FAIL;
 
     // Calculate the hashed index of the table
     size_t index = hash_key(proto->hash, key, 0, capacity);
@@ -105,26 +107,32 @@ static void* dscl_hashtable_slot_insert(dscl_hashslot_t* slots, const size_t cap
         // to update its value and we're done!
         if (proto->equals(slots[index].key, key)) {
             slots[index].value = value;
-            return slots[index].key;
+            return HMI_REPLACE;
         }
 
         // Otherwise, the key wasn't in this slot; we need to move
         // to the next index, as given by the checks
         checks++;
         index = hash_key(proto->hash, key, checks, capacity);
+
+        // if the checks have exceeded the size of the hashtable,
+        // there's nowhere else to add, so we need to expand the hashtable
+        if (checks >= capacity) {
+            return HMI_NEEDS_EXPAND;
+        }
     }
 
     // We found an empty/deleted space, so create a new item at the free slot
     if (cpy == 0) {
         key = proto->copy_key(key);
-        if (key == NULL) return NULL;
+        if (key == NULL) return HMI_FAIL;
     }
 
     slots[index].key = (void*)key;
     slots[index].value = value;
     slots[index].state = INSERTED;
 
-    return key;
+    return HMI_INSERT;
 }
 
 
@@ -135,7 +143,7 @@ static void* dscl_hashtable_slot_insert(dscl_hashslot_t* slots, const size_t cap
  * @param hm The hash table to be expanded.
  * @return The new capacity of the hash table.
  */
-size_t dscl_hashtable_expand(dscl_hashmap_t* hm) {
+size_t dscl_hashmap_expand(dscl_hashmap_t* hm) {
     size_t const new_capacity = hm->capacity * HT_EXPANSION_MULTIPLIER;
     dscl_hashslot_t* new_slots = calloc(new_capacity, sizeof(dscl_hashslot_t));
 
@@ -159,19 +167,27 @@ size_t dscl_hashtable_expand(dscl_hashmap_t* hm) {
 }
 
 void* dscl_hashmap_insert(dscl_hashmap_t* hm, void* key, void* value) {
-    if (hm->slots == NULL || value == NULL) return NULL;
+    if (hm->slots == NULL || key == NULL) return NULL;
 
     // Check if we first need to expand the table, doing so if needed
     size_t capacity = hm->capacity;
     if ((double)hm->size/hm->capacity >= HT_EXPANSION_FACTOR) {
-        capacity = dscl_hashtable_expand(hm);
+        capacity = dscl_hashmap_expand(hm);
     }
 
-    void* result = dscl_hashtable_slot_insert(hm->slots, capacity, key, value, 0, hm);
-    if (result == NULL) return NULL;
+    hmi_result_t result = dscl_hashtable_slot_insert(hm->slots, capacity, key, value, 0, hm);
+    while (result == HMI_NEEDS_EXPAND) {
+        capacity = dscl_hashmap_expand(hm);
+        result = dscl_hashtable_slot_insert (hm->slots, capacity, key, value, 0, hm);
+    }
 
-    hm->size++;
-    return result;
+    switch (result) {
+        case HMI_FAIL: return NULL;
+        case HMI_INSERT: hm->size++;
+        default: break;
+    }
+    
+    return key;
 }
 
 
@@ -222,6 +238,30 @@ void* dscl_hashmap_get(const dscl_hashmap_t* hm, void* key) {
 
     // There is no such item in the hashtable
     return NULL;
+}
+
+int dscl_hashmap_size(dscl_hashmap_t* hm) {
+    return hm->size;
+}
+
+int dscl_hashmap_has_key(dscl_hashmap_t* hm, void* key) {
+    if (key == NULL) return -1;
+
+    size_t index = hash_key(hm->hash, key, 0, hm->capacity);
+    size_t checks = 0;
+    while (hm->slots[index].state != EMPTY && checks < hm->capacity) {
+        // If we have a matching key
+        if (hm->slots[index].state == INSERTED && hm->equals(hm->slots[index].key, key)) {
+            return 1;
+        }
+
+        // Otherwise, check the next possible index
+        checks++;
+        index = hash_key(hm->hash, key, checks, hm->capacity);
+    }
+
+    // There is no such item in the hashtable
+    return 0;
 }
 
 void dscl_hashmap_debug(const dscl_hashmap_t* hm) {
