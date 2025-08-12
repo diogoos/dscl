@@ -1,6 +1,6 @@
 LIB = build/libdscl.a 
 
-CFLAGS = -Wall -pedantic -Iinclude -ggdb
+CFLAGS = -Wall -pedantic -Iinclude
 CC = gcc
 
 SRCS = $(wildcard src/*.c)
